@@ -1,0 +1,219 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+use Magento\Framework\View\Element\Template;
+
+// @codingStandardsIgnoreFile
+
+/** @var $block \Magento\Shipping\Block\Tracking\Popup */
+
+$results = $block->getTrackingInfo();
+?>
+
+<div class="page tracking">
+    <?php if (!empty($results)): ?>
+        <?php foreach ($results as $shipId => $result): ?>
+            <?php if ($shipId): ?>
+                <div class="order subtitle caption"><?= /* @noEscape */ $block->escapeHtml(__('Shipment #')) . $shipId ?></div>
+            <?php endif; ?>
+            <?php if (!empty($result)): ?>
+                <?php
+
+                $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                $egexpress = $objectManager->get("\Fkra\EgyptExpress\Model\Carrier\Egyptexpress");
+
+                $logger = $objectManager->get("\Fkra\EgyptExpress\Logger\Logger");
+
+
+
+                $active =  $egexpress->getConfigDataSystem('active');
+                if($active == '1'){
+                    ?>
+
+                    <?php
+                    foreach ($result as $counter => $track):
+                        $awd[] = $track['number'];
+                    endforeach;
+
+
+
+                    $accountNo =  $egexpress->getConfigDataSystem('accountno');
+                    $password = md5($egexpress->getConfigDataSystem('spassword'));
+                    $security_key = $egexpress->getConfigDataSystem('securitykey');
+
+                    //encrypt security key
+                    $keyEncrypted = strrev(md5($security_key));
+
+                    $hashKey = trim(sha1($keyEncrypted));
+
+
+
+                    $postdata['accountNo'] =  $accountNo ;
+                    $postdata['password'] = $password;
+
+                    $postdata['hashkey'] = $hashKey;
+                    $postdata['SN'] = $awd;
+                    //echo '<pre>';
+                    //print_r ($postdata);
+                    //die();
+                    
+                    ////////////////
+
+                   // $response = postHttpRequest("http://82.129.197.84:8080/api/AWBstatus",$postdata);
+
+
+
+                        $options = array(
+                            'http' => array(
+                                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                                'method'  => 'POST',
+                                'content' => http_build_query($postdata)
+                            ),
+                            "ssl"=>array(
+                                "verify_peer"=>false,
+                                "verify_peer_name"=>false,
+                            )
+                        );
+                        $context  = stream_context_create($options);
+                        $response = file_get_contents("https://api.egyptexpress.me/api/AWBstatus", false, $context);
+
+                        $logger->info('$response :' .$response);
+
+                      $responsedata = json_decode($response, TRUE);
+
+                     //  $logger->info('responsedata :' .$responsedata);
+
+                    /*
+                    $fields_string = http_build_query($postdata);
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, "http://82.129.197.84:8080/api/AWBstatus");
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    curl_setopt($ch, CURLOPT_POST, true);
+
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+                    $output = curl_exec($ch);
+                    $logger->info('output :' .$output);
+                    $info = curl_getinfo($ch);
+                    curl_close($ch);
+                    $res = json_decode($output);
+                    $logger->info('res :' .$res);
+
+                    $responsedata= json_decode($output, TRUE);
+
+                    // echo '<pre>';
+                    // print_r ($responsedata);
+                    // die
+
+                    */
+                    ?>
+                    <?php
+                    $rcode = $responsedata['response_code'];
+
+                    $logger->info('response_code :' .$responsedata['response_code']);
+
+                    
+                    switch($rcode){
+                        case '200':
+                          //  echo '<h3><b>Response : </b> Success</h3>';
+                            break;
+                        case '-1':
+                            echo '<h3><b>Response : </b> Invalid DWB Serial Number</h3>';
+                            break;
+                        case '-2':
+                            echo '<h3><b>Response : </b> Unknown Error</h3>';
+                            break;
+                        case '-3':
+                            echo '<h3><b>Response : </b> Invalid HashKey</h3>';
+                            break;
+                        case '-4':
+                            echo '<h3><b>Response : </b> Invalid Account</h3>';
+                            break;
+                        case '-5':
+                            echo '<h3><b>Response : </b> Invalid Parameters</h3>';
+                            break;
+                        case '-6':
+                            echo '<h3><b>Response : </b> Invalid IP Address</h3>';
+                            break;
+
+                    }
+
+                    echo '<h5><b>Tracking Table </b></h5>';
+                    ?>
+
+                    <table border="1">
+                        <thead><th>AWBNo</th><th>Status</th><th>Reason</th></thead>
+                        <tbody>
+
+                        <?php
+                        $rstatus =  $responsedata['status'];
+                        for($i=0;$i<count($rstatus);$i++){
+                            ?>
+                            <tr>
+                                <td><?php echo $rstatus[$i]['AWBNo']; ?></td>
+                                <td><?php  echo $rstatus[$i]['status']; ?></td>
+                                <td><?php  echo $rstatus[$i]['reason']; ?></td>
+                            </tr>
+                            <?php
+                        }
+                        ?>
+
+
+                        </tbody>
+                    </table>
+
+                    <?php
+                }else{
+                    ?>
+
+                    <?php foreach ($result as $counter => $track): ?>
+                        <div class="table-wrapper">
+                            <?php
+                            $shipmentBlockIdentifier = $shipId . '.' . $counter;
+                            $block->addChild('shipping.tracking.details.' . $shipmentBlockIdentifier, Template::class, [
+                                    'track' => $track,
+                                    'template' => 'Magento_Shipping::tracking/details.phtml',
+                                    'storeSupportEmail' => $block->getStoreSupportEmail()
+                                ]
+                            );
+                            ?>
+                            <?= /* @noEscape */ $block->getChildHtml('shipping.tracking.details.' . $shipmentBlockIdentifier) ?>
+                        </div>
+                        <?php if (is_object($track) && !empty($track->getProgressdetail())): ?>
+                            <?php
+                            $block->addChild('shipping.tracking.progress.' . $shipmentBlockIdentifier, Template::class, [
+                                'track' => $track,
+                                'template' => 'Magento_Shipping::tracking/progress.phtml'
+                            ]);
+                            ?>
+                            <?= /* @noEscape */ $block->getChildHtml('shipping.tracking.progress.' . $shipmentBlockIdentifier) ?>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                    <?php
+                }
+                ?>
+
+
+            <?php else: ?>
+
+                <div class="message info empty">
+                    <div><?= $block->escapeHtml(__('There is no tracking available for this shipment.')) ?></div>
+                </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <div class="message info empty">
+            <div><?= $block->escapeHtml(__('There is no tracking available.')) ?></div>
+        </div>
+    <?php endif; ?>
+    <div class="actions">
+        <button type="button"
+                title="<?= $block->escapeHtml(__('Close Window')) ?>"
+                class="action close"
+                onclick="window.close(); window.opener.focus();">
+            <span><?= $block->escapeHtml(__('Close Window')) ?></span>
+        </button>
+    </div>
+</div>

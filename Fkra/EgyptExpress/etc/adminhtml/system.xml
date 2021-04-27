@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="carriers" translate="label" type="text" sortOrder="320" showInDefault="1" showInWebsite="1" showInStore="1">
+
+            <group id="egyptexpress" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Egypt Express</label>
+                <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="name" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Method Name</label>
+                </field>
+                <!--field id="price" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Price</label>
+                    <validate>validate-number validate-zero-or-greater</validate>
+                </field-->
+                <!--field id="handling_type" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Calculate Handling Fee</label>
+                    <source_model>Magento\Shipping\Model\Source\HandlingType</source_model>
+                </field-->
+                <!--field id="handling_fee" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Handling Fee</label>
+                    <validate>validate-number validate-zero-or-greater</validate>
+                </field-->
+                <field id="sort_order" translate="label" type="text" sortOrder="1000" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                </field>
+                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title</label>
+                </field>
+                <field id="origincity" translate="label" type="select" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Shipping Origin City</label>
+                    <frontend_class>shipping-origin-city</frontend_class>
+                    <source_model>Fkra\EgyptExpress\Block\Adminhtml\Config\Backend\Origincity</source_model>
+                </field>
+                <field id="sallowspecific" translate="label" type="select" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Ship to Applicable Countries</label>
+                    <frontend_class>shipping-applicable-country</frontend_class>
+                    <source_model>Magento\Shipping\Model\Config\Source\Allspecificcountries</source_model>
+                </field>
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="910" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Ship to Specific Countries</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                    <can_be_empty>1</can_be_empty>
+                </field>
+                <field id="showmethod" translate="label" type="select" sortOrder="920" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Show Method if Not Applicable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="specificerrmsg" translate="label" type="textarea" sortOrder="800" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Displayed Error Message</label>
+                </field>
+                <field id="accountno" translate="label" type="text" sortOrder="801" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Account No </label>
+                </field>
+                <field id="spassword" translate="label" type="password" sortOrder="802" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Password</label>
+                </field>
+                <field id="shippername" translate="label" type="text" sortOrder="803" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Shipper Name </label>
+                </field>
+                <field id="shipperphone" translate="label" type="text" sortOrder="804" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Shipper Phone </label>
+                </field>
+                <field id="shippercity" translate="label" type="text" sortOrder="805" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Shipper City </label>
+                </field>
+                <field id="shipperaddress" translate="label" type="text" sortOrder="806" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Shipper Address </label>
+                </field>
+                <field id="securitykey" translate="label" type="password" sortOrder="807" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Security Key</label>
+                </field>
+                <field id="goodsdescription" translate="label" type="text" sortOrder="808" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Goods Description</label>
+                </field>
+                <field id="goodsorigincountry" translate="label" type="text" sortOrder="809" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Goods Origin Country</label>
+                </field>
+            </group>
+
+        </section>
+
+    </system>
+</config>
